@@ -1,0 +1,36 @@
+{% extends 'baseLogedIn.html' %}
+{%block title %}
+    Add funds
+{% endblock %}
+
+{% block content%}
+    {% if current_user.verificated %}
+    <h1>TRENUTNO NA RACUNU U BANCI IMAS:</h1>
+    <h1>{{current_user.card[0].budget}}$</h1>
+
+    <h1>A NA ON-LINE RACUNU IMAS:</h1>
+    <h1>{{current_user.budget}}$</h1>
+
+    <body class="text-center">
+        <div class="container">
+        <form method="POST" class="form-signin">
+            {{ form.hidden_tag() }}
+            <h1 class="h3 mb-3 font-weight-normal">
+                Enter the amount to transfer
+            </h1>
+            <br>
+            {{ form.amount.label() }}
+            {{ form.amount(class="form-control", placeholder="Amount") }}
+
+            <br>
+
+
+            {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+
+        </form>
+    </div>
+    {% else %}
+    <h1>NISI VERIFIKOVAN</h1>
+    {% endif %}
+
+{% endblock %}
