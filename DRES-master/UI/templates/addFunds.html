@@ -1,36 +1,211 @@
+
+
 {% extends 'baseLogedIn.html' %}
+
 {%block title %}
     Add funds
 {% endblock %}
 
 {% block content%}
-    {% if current_user.verificated %}
-    <h1>TRENUTNO NA RACUNU U BANCI IMAS:</h1>
-    <h1>{{current_user.card[0].budget}}$</h1>
+<style>
+body {
+    background-color: #f9f9fa
+}
 
-    <h1>A NA ON-LINE RACUNU IMAS:</h1>
-    <h1>{{current_user.budget}} {{current_user.currency}}</h1>
+.padding {
+    padding: 3rem !important
+}
 
-    <body class="text-center">
-        <div class="container">
-        <form method="POST" class="form-signin">
-            {{ form.hidden_tag() }}
-            <h1 class="h3 mb-3 font-weight-normal">
-                Enter the amount to transfer
-            </h1>
-            <br>
-            {{ form.amount.label() }}
-            {{ form.amount(class="form-control", placeholder="Amount") }}
+.user-card-full {
+    overflow: hidden;
+}
 
-            <br>
+.card {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 20px 0 rgba(69,90,100,0.08);
+    box-shadow: 0 1px 20px 0 rgba(69,90,100,0.08);
+    border: none;
+    margin-bottom: 30px;
+}
+
+.m-r-0 {
+    margin-right: 0px;
+}
+
+.m-l-0 {
+    margin-left: 0px;
+}
+
+.user-card-full .user-profile {
+    border-radius: 5px 0 0 5px;
+}
+
+.bg-c-lite-green {
+        background: -webkit-gradient(linear, left top, right top, from(#9884ff), to(#1c1763));
+    background: linear-gradient(to right, #9884ff, #1c1763);
+}
+
+.user-profile {
+    padding: 20px 0;
+}
+
+.card-block {
+    padding: 1.25rem;
+}
+
+.m-b-25 {
+    margin-bottom: 25px;
+}
+
+.img-radius {
+    border-radius: 5px;
+}
 
 
-            {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+ 
+h6 {
+    font-size: 14px;
+}
 
-        </form>
+.card .card-block p {
+    line-height: 25px;
+}
+
+@media only screen and (min-width: 1400px){
+p {
+    font-size: 14px;
+}
+}
+
+.card-block {
+    padding: 1.25rem;
+}
+
+.b-b-default {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.m-b-20 {
+    margin-bottom: 20px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px !important;
+}
+
+.card .card-block p {
+    line-height: 25px;
+}
+
+.m-b-10 {
+    margin-bottom: 10px;
+}
+
+.text-muted {
+    color: #919aa3 !important;
+}
+
+.b-b-default {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.f-w-600 {
+    font-weight: 600;
+}
+
+.m-b-20 {
+    margin-bottom: 20px;
+}
+
+.m-t-40 {
+    margin-top: 20px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px !important;
+}
+
+.m-b-10 {
+    margin-bottom: 10px;
+}
+
+.m-t-40 {
+    margin-top: 20px;
+}
+
+.user-card-full .social-link li {
+    display: inline-block;
+}
+
+.user-card-full .social-link li a {
+    font-size: 20px;
+    margin: 0 10px 0 0;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+</style>
+
+<div class="page-content page-container" id="page-content">
+    <div class="padding">
+        <div class="row container d-flex justify-content-center">
+            <div class="col-xl-6 col-md-12">
+                
+                <div class="card user-card-full">
+                    <div class="row m-l-0 m-r-0">
+                        <div class="col-sm-12 bg-c-lite-green user-profile">
+                            <h6 class="f-w-600">{{current_user.name}}</h6>
+                                <i class=" mdi mdi-square-edit-outline feather icon-edit m-t-10 f-16"></i>
+                        </div>
+                    </div>
+                    
+                        {% if current_user.verificated %}
+                    <div class="col-sm-12">
+                        <div class="card-block">
+                            <h6 class="m-b-20 p-b-5 b-b-default f-w-600">Information</h6>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="m-b-10 f-w-600">The amount in the bank account</p>
+                                    <h6 class="text-muted f-w-400">{{current_user.card[0].budget}}$</h6>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="m-b-10 f-w-600">The amount in the online account</p>
+                                    <h6 class="text-muted f-w-400">{{current_user.budget}} {{current_user.currency}}</h6>
+                                </div>
+                            </div> 
+                            <body class="text-center">
+                                <div class="container">
+                                <form method="POST" class="form-signin">
+                                    {{ form.hidden_tag() }}
+                                </br>
+                                    <p class="m-b-10 f-w-600">Enter the amount to transfer</p>
+                                
+                                    <br>
+                                    {{ form.amount.label() }}
+                                    {{ form.amount(class="form-control", placeholder="Amount") }}
+                        
+                                    <br>
+                        
+                        
+                                    {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+                        
+                                </form>
+                            </div>
+                            {% else %}
+                            <h1>NISI VERIFIKOVAN</h1>
+                            {% endif %}                            
+                        
+                    
+                </div>
+                
+            </div>
+        </div>
     </div>
-    {% else %}
-    <h1>NISI VERIFIKOVAN</h1>
-    {% endif %}
+    
+</div>
 
 {% endblock %}
+
+
+
+
+

@@ -1,57 +1,233 @@
 {% extends 'baseLogedIn.html' %}
+
 {%block title %}
     Exchange currency
 {% endblock %}
 
 {% block content%}
-<span>
-<h1>Trenutno imate: {{current_user.budget}} {{current_user.currency}}</h1>
-<input id="amount" type="hidden" value="{{current_user.budget}}">
-<input id="currency" type="hidden" value="{{current_user.currency}}">
+<style>
+body {
+    background-color: #f8f8fa
+}
 
-</span>
-<div class="container">
-    <form method="POST" class="form-signin">
-        <input id="total" name="return" type="hidden" value="0">
-        <input id="retCur" name="returnCurrency" type="hidden" value="0">
-        <span>
-            <label>Izaberite u koju valutu zelite da promenite: </label>
-        <select onchange="getval(this)" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
-            <option selected>Opcije</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-            <option value="RSD">RSD</option>
-        </select>
-        <h4 id="result"></h4>
-        <input type="submit" id="submit" value="Submit" disabled>
-        </span>
-</form>
+.padding {
+    padding: 3rem !important
+}
+
+.user-card-full {
+    overflow: hidden;
+}
+
+.card {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 20px 0 rgba(69,90,100,0.08);
+    box-shadow: 0 1px 20px 0 rgba(69,90,100,0.08);
+    border: none;
+    margin-bottom: 30px;
+}
+
+.m-r-0 {
+    margin-right: 0px;
+}
+
+.m-l-0 {
+    margin-left: 0px;
+}
+
+.user-card-full .user-profile {
+    border-radius: 5px 0 0 5px;
+}
+
+.bg-c-lite-green {
+        background: -webkit-gradient(linear, left top, right top, from(#9884ff), to(#1c1763));
+    background: linear-gradient(to right, #9884ff, #1c1763);
+}
+
+.user-profile {
+    padding: 20px 0;
+}
+
+.card-block {
+    padding: 1.25rem;
+}
+
+.m-b-25 {
+    margin-bottom: 25px;
+}
+
+.img-radius {
+    border-radius: 5px;
+}
+
+
+ 
+h6 {
+    font-size: 14px;
+}
+
+.card .card-block p {
+    line-height: 25px;
+}
+
+@media only screen and (min-width: 1400px){
+p {
+    font-size: 14px;
+}
+}
+
+.card-block {
+    padding: 1.25rem;
+}
+
+.b-b-default {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.m-b-20 {
+    margin-bottom: 20px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px !important;
+}
+
+.card .card-block p {
+    line-height: 25px;
+}
+
+.m-b-10 {
+    margin-bottom: 10px;
+}
+
+.text-muted {
+    color: #919aa3 !important;
+}
+
+.b-b-default {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.f-w-600 {
+    font-weight: 600;
+}
+
+.m-b-20 {
+    margin-bottom: 20px;
+}
+
+.m-t-40 {
+    margin-top: 20px;
+}
+
+.p-b-5 {
+    padding-bottom: 5px !important;
+}
+
+.m-b-10 {
+    margin-bottom: 10px;
+}
+
+.m-t-40 {
+    margin-top: 20px;
+}
+
+.user-card-full .social-link li {
+    display: inline-block;
+}
+
+.user-card-full .social-link li a {
+    font-size: 20px;
+    margin: 0 10px 0 0;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+</style>
+
+<div class="page-content page-container" id="page-content">
+    <div class="padding">
+        <div class="row container d-flex justify-content-center">
+            <div class="col-xl-6 col-md-12">
+                <div class="card user-card-full">
+                    <div class="row m-l-0 m-r-0">
+                        <div class="col-sm-12 bg-c-lite-green user-profile">
+                            <h6 class="f-w-600">{{current_user.name}}</h6>
+                                <i class=" mdi mdi-square-edit-outline feather icon-edit m-t-10 f-16"></i>
+                        </div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div class="card-block">
+                            <h6 class="m-b-20 p-b-5 b-b-default f-w-600">Information</h6>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <p class="m-b-10 f-w-600">Current account balance</p>
+                                    <h6 class="text-muted f-w-400">{{current_user.budget}} {{current_user.currency}}
+                                        <input id="amount" type="hidden" value="{{current_user.budget}}">
+                                        <input id="currency" type="hidden" value="{{current_user.currency}}">
+                                    </h6>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="m-b-10 f-w-600">Choose which currency you want to change to</p>
+                                    <h6 class="text-muted f-w-400">
+                                        <div class="container">
+                                            <form method="POST" class="form-signin">
+                                                <input id="total" name="return" type="hidden" value="0">
+                                                <input id="retCur" name="returnCurrency" type="hidden" value="0">
+                                                <span>
+                                                    
+                                                <select onchange="getval(this)" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                                                    <option selected>Opcije</option>
+                                                    <option value="USD">USD</option>
+                                                    <option value="EUR">EUR</option>
+                                                    <option value="GBP">GBP</option>
+                                                    <option value="RSD">RSD</option>
+                                                </select>
+                                                <p id="result"></p>
+                                                <input type="submit" id="submit" value="Submit" disabled>
+                                            </form>
+                                            <script>
+                                                function getval(sel) {
+                                                 let fromCurrency = document.getElementById("currency").value;
+                                                 let toCurrency = sel.value
+                                                 let amt = document.getElementById("amount").value
+                                                 if(toCurrency != 'Opcije'){
+                                                     fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+                                                         .then(response => {
+                                                             return response.json();
+                                                         })
+                                                         .then(data => {
+                                                             let rate = data.rates[toCurrency];
+                                                             let total = (rate * amt).toFixed(4);
+                                                             document.getElementById("result").innerHTML = `Do you want to exchange ${amt} ${fromCurrency} for ${total} ${toCurrency} ?`
+                                                             document.getElementById("total").value = total
+                                                             document.getElementById("retCur").value = sel.value
+                                                             document.getElementById("submit").removeAttribute("disabled");
+                                                         });
+                                                     }
+                                                 else {
+                                                     document.getElementById("result").innerHTML = ""
+                                                     document.getElementById("submit").disabled = true;
+                                                 }
+                                                 }
+                                             </script>
+                                    </h6>
+                                </div>
+                            </div>                             
+                        
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
-<script>
-   function getval(sel) {
-    let fromCurrency = document.getElementById("currency").value;
-    let toCurrency = sel.value
-    let amt = document.getElementById("amount").value
-    if(toCurrency != 'Opcije'){
-        fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                let rate = data.rates[toCurrency];
-                let total = rate * amt;
-                document.getElementById("result").innerHTML = `Da li zelite da zamijenite ${amt} ${fromCurrency} za ${total} ${toCurrency} ?`
-                document.getElementById("total").value = total
-                document.getElementById("retCur").value = sel.value
-                document.getElementById("submit").removeAttribute("disabled");
-            });
-        }
-    else {
-        document.getElementById("result").innerHTML = ""
-        document.getElementById("submit").disabled = true;
-    }
-    }
-</script>
 {% endblock %}
+
+
+
+
+
+
+
+
+

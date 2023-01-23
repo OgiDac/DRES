@@ -135,6 +135,7 @@ def add_funds():
             amount = rate * int(form.amount.data)
             current_user.budget = current_user.budget + amount
             current_user.card[0].budget = current_user.card[0].budget - int(form.amount.data)        
+            current_user.budget = round(current_user.budget, 4)
             user_data = make_user_to_update(current_user)
             card_data = make_card_to_update(current_user.card[0])
 
@@ -208,6 +209,7 @@ def exchange():
         currency = request.form['returnCurrency']
         print(total)
         print(currency)
+        current_user.budget = round(float(total), 4)
         current_user.budget = total
         current_user.currency = currency
         user_data = make_user_to_update(current_user)
