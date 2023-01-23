@@ -54,3 +54,6 @@ class AddFundsForm(FlaskForm):
     amount=StringField(label='Amount', validators=[DataRequired()])
     
     submit = SubmitField(label='Submit')
+class CurrencyForm(FlaskForm):
+   
+    submit = SubmitField(label='Submit')

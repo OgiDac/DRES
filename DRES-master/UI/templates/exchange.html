@@ -1,0 +1,57 @@
+{% extends 'baseLogedIn.html' %}
+{%block title %}
+    Exchange currency
+{% endblock %}
+
+{% block content%}
+<span>
+<h1>Trenutno imate: {{current_user.budget}} {{current_user.currency}}</h1>
+<input id="amount" type="hidden" value="{{current_user.budget}}">
+<input id="currency" type="hidden" value="{{current_user.currency}}">
+
+</span>
+<div class="container">
+    <form method="POST" class="form-signin">
+        <input id="total" name="return" type="hidden" value="0">
+        <input id="retCur" name="returnCurrency" type="hidden" value="0">
+        <span>
+            <label>Izaberite u koju valutu zelite da promenite: </label>
+        <select onchange="getval(this)" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+            <option selected>Opcije</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="RSD">RSD</option>
+        </select>
+        <h4 id="result"></h4>
+        <input type="submit" id="submit" value="Submit" disabled>
+        </span>
+</form>
+</div>
+
+<script>
+   function getval(sel) {
+    let fromCurrency = document.getElementById("currency").value;
+    let toCurrency = sel.value
+    let amt = document.getElementById("amount").value
+    if(toCurrency != 'Opcije'){
+        fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`)
+            .then(response => {
+                return response.json();
+            })
+            .then(data => {
+                let rate = data.rates[toCurrency];
+                let total = rate * amt;
+                document.getElementById("result").innerHTML = `Da li zelite da zamijenite ${amt} ${fromCurrency} za ${total} ${toCurrency} ?`
+                document.getElementById("total").value = total
+                document.getElementById("retCur").value = sel.value
+                document.getElementById("submit").removeAttribute("disabled");
+            });
+        }
+    else {
+        document.getElementById("result").innerHTML = ""
+        document.getElementById("submit").disabled = true;
+    }
+    }
+</script>
+{% endblock %}

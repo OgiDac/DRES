@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(length=60), nullable=False)
     verificated = db.Column(db.Boolean(),default=False, nullable=False)
     budget = db.Column(db.Integer(), default = 0)
+    currency = db.Column(db.String(length = 10), nullable=False, default = 'USD')
     transactions = db.Column(db.PickleType())
     card = db.relationship("Card", backref = "owned_user", lazy = 'subquery')
 

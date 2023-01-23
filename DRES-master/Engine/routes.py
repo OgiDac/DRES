@@ -42,6 +42,7 @@ def login():
 def getuser(): 
     id = request.data.decode("utf-8") 
     user = User.query.filter_by(id = id).first()
+    print("Pozvan sam za " + id)
     user_binary = pickle.dumps(user)
     if user:
         #login_user(user)
@@ -67,6 +68,7 @@ def updateprofile():
     changed_user.password = s['password']
     changed_user.verificated = s['verificated']
     changed_user.budget = s['budget']
+    changed_user.currency = s['currency']
     changed_user.transactions = s['transactions']
 
     db.session.commit()

@@ -6,13 +6,11 @@ from flask_login import UserMixin
 @login_manager.user_loader
 def load_user(user_id):
     response =  requests.get('http://localhost:5001/getuser',data=user_id)
-    attempted_user = pickle.loads(response.content)
-    # card_response = requests.get('http://localhost:5001/getcardbyowner', data = str(attempted_user.id))
-    # if response.content == b'false':
-    #     pass
-    # else:
-    #     card = pickle.loads(card_response.content)
-    #     attempted_user.card[0] = card
+    if response.content == b'false':
+            attempted_user = None
+    else:
+        attempted_user = pickle.loads(response.content)
+    
     return attempted_user
 
 class User:
@@ -28,6 +26,7 @@ class User:
         self.password = password
         self.card = Card
         self.transactions = []
+        self.currency = 'USD'
 
     # id = db.Column(db.Integer(), primary_key = True)
     # name = db.Column(db.String(length = 20), nullable = False)
