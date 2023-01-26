@@ -7,7 +7,9 @@
 {% block content%}
 
 <a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('filterBy')}}" style="float: left">Filter by</a>
-<a class="btn btn-outline-success my-2 my-sm-0 " href="#" style="float: left">Sort</a>
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('sort')}}" style="float: left">Sort by date ↑</a>
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('sortDesc')}}" style="float: left">Sort by date ↓</a>
+
 
 <table class="table">
     <thead>
@@ -44,6 +46,29 @@
     </tbody>
   </table>
 
+  {% endblock %}
+  <script>
+   /* document.getElementById("sort-button").addEventListener("click", function() {
+    fetch('/sortTransactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            sortBy: 'time_created',
+            order: 'asc'
+        })
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        items = data;
+        updateTable();
+    });
+});*/
 
-{% endblock %}
+
+</script>
+
+
+
 

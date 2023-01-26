@@ -336,4 +336,18 @@ def exchange():
        
     return render_template('exchange.html', form=form)
 
+@app.route('/sort', methods = ['GET', 'POST'])
+@login_required
+def sort():
+    response = requests.get('http://localhost:5001/sort', data=str(current_user.id))
+    list = pickle.loads(response.content)
 
+    return render_template('transactionHistory.html', items = list)
+
+@app.route('/sortDesc', methods = ['GET', 'POST'])
+@login_required
+def sortDesc():
+    response = requests.get('http://localhost:5001/getAllTransactions', data=str(current_user.id))
+    list = pickle.loads(response.content)
+
+    return render_template('transactionHistory.html', items = list)

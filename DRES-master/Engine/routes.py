@@ -1,7 +1,7 @@
 
 from Engine import app
 import pickle
-from flask import redirect, render_template, request, flash, session, url_for
+from flask import redirect, render_template, request, flash, session, url_for, jsonify
 from Engine import db
 import Engine
 from Engine.models import User, Card, Transaction
@@ -282,4 +282,41 @@ def getAllTransactions():
 
     return pickle.dumps(sort)
 
+@app.route('/sort', methods=['GET'])
+def sort(): 
+    id = request.data.decode("utf-8") 
+    user = User.query.filter_by(id = id).first()
+    list1 = user.sender 
+    list2 = user.receiver
+    for el in list1:
+        if not isinstance(el.receiver, int):
+            el.email = el.receiver
+        else:
+            el.email = el.receiver_ref.email
+        el.money = '-' + str(el.amount) + ' ' + el.currency
+    for el in list2:
+        if not isinstance(el.receiver, int):
+            el.email = el.receiver
+        else:
+            el.email = el.sender_ref.email
+        el.money = '+' + str(el.amount) + ' ' + el.currency
 
+    list = list1 + list2
+    sort = sorted(list, key=lambda x: x.time_created)
+
+    return pickle.dumps(sort)
+
+"""
+@app.route('/sortTransactions', methods=['POST'])
+def sortTransactions():
+    sortBy = request.json['sortBy']
+    order = request.json['order']
+
+    transactions = Transaction.query.all()
+    if order == 'desc':
+        transactions = sorted(transactions, key=lambda x: getattr(x, sortBy), reverse=True)
+    else:
+        transactions = sorted(transactions, key=lambda x: getattr(x, sortBy),reverse=False)
+
+    return jsonify(transactions)
+"""
