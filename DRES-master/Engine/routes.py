@@ -4,7 +4,7 @@ import pickle
 from flask import redirect, render_template, request, flash, session, url_for
 from Engine import db
 import Engine
-from Engine.models import User, Card
+from Engine.models import User, Card, Transaction
 import requests
 from sqlalchemy.orm import lazyload
 import multiprocessing
@@ -50,6 +50,19 @@ def getuser():
         return user_binary
     else:
         return 'false'
+    
+@app.route('/getuserbyemail', methods=['GET'])
+def getuserbyemail(): 
+    email = request.data.decode("utf-8") 
+    user = User.query.filter_by(email = email).first()
+    print("Pozvan sam za " + email)
+    user_binary = pickle.dumps(user)
+    if user:
+        #login_user(user)
+      
+        return user_binary
+    else:
+        return 'false'
 
 
     
@@ -69,7 +82,6 @@ def updateprofile():
     changed_user.verificated = s['verificated']
     changed_user.budget = s['budget']
     changed_user.currency = s['currency']
-    changed_user.transactions = s['transactions']
 
     db.session.commit()
     return 'Hello from app2!'
@@ -88,24 +100,11 @@ def updatecard():
     db.session.commit()
     return 'Hello from app2!'
 
-# @app.route('/verificate', methods=['POST'])
-# def verificated():
-#     s =pickle.loads(request.data)
-#     print(s)
-#     card_to_create = Card(number = s['number'], owner = s['owner'], expire_date = s['expire_date'], code = s['code'])
-#     user = User.query.filter_by(id=card_to_create.owner).first()
-#     user.budget = user.budget -1
-#     user.verificated=True
-#     db.session.add(card_to_create)
-#     db.session.commit()
-#     return "blahblah"
-
-
 @app.route('/getcard', methods=['GET'])
 def get_card():
     number = request.data.decode("utf-8") 
     card = Card.query.filter_by(number = number).first()
-    print(card)
+    print(card.number)
     card_binary = pickle.dumps(card)
     if card:
         #login_user(user)
@@ -187,15 +186,100 @@ def cardTransaction():
        print('false')
        return 'false'
 
-    """
-    if user :
-        user.budget += int(data['amount'])
-        print(user.budget)
-    #elif card: 
-        #card.budget += int(data['amount'])
+   
+@app.route("/makeTransaction", methods=['GET', 'POST'])
+def makeTransaction():
+    print('Izvrsava se')
+    data = request.data
+    object = pickle.loads(data)
+    sender = User.query.filter_by(id = object['sender']).first()
+     
+
+    if object['type'].__eq__('online'):
+        receiver = User.query.filter_by(email = object['receiver']).first()
+        tran = Transaction(sender = object['sender'], receiver = object['receiver'], amount = object['amount'], state = object['state'], currency = object['currency'], type = 'online')
+      
+        if receiver == None:
+            tran.state = 3
+            db.session.add(tran)
+            db.session.commit()
+            return 'false'
+        tran.receiver = str(receiver.id)
+        string = 'https://api.exchangerate-api.com/v4/latest/' + object['currency']
+        response =  requests.get(string)
+        data = response.json()
+        rate = data['rates'][receiver.currency]
+        amount = rate * float(object['amount'])
+
+        print(object['amount'] + object['currency'])
+        print(str(amount) + receiver.currency)
+        
+        if sender.budget - float(object['amount']) > 0:
+
+            sender.budget = round(sender.budget - float(object['amount']), 4)
+            receiver.budget = round(receiver.budget + amount, 4)
+            tran.state = 2
+            db.session.add(tran)
+            db.session.commit()
+        else:
+            tran.state = 3
+            db.session.add(tran)
+            db.session.commit()
+            return 'false'
+
     else:
-        print('false')
-        return 'false'
-    """
-    
+        card = Card.query.filter_by(number = object['receiver']).first()
+        if card == None:
+            tran.state = 3
+            db.session.add(tran)
+            db.session.commit()
+            return 'false'
+        receiver = User.query.filter_by(id = card.owner).first()
+        tran = Transaction(sender = object['sender'], receiver = str(receiver.id), amount = object['amount'], state = object['state'], currency = object['currency'], type = 'card')
+        string = 'https://api.exchangerate-api.com/v4/latest/' + object['currency']
+        response =  requests.get(string)
+        data = response.json()
+        rate = data['rates'][receiver.currency]
+        amount = rate * float(object['amount'])
+
+        if sender.budget - float(object['amount']) > 0:
+            sender.budget = round(sender.budget - float(object['amount']), 4)
+            card.budget = round(card.budget + amount, 4)
+            tran.state = 2
+
+            db.session.add(tran)
+
+            db.session.commit()
+        else:
+            tran.state = 3
+            db.session.add(tran)
+            db.session.commit()
+            return 'false'
+    print('Zavrseno sa izvrsavanjem')
+    return 'true'
+
+@app.route('/getAllTransactions', methods=['GET'])
+def getAllTransactions(): 
+    id = request.data.decode("utf-8") 
+    user = User.query.filter_by(id = id).first()
+    list1 = user.sender 
+    list2 = user.receiver
+    for el in list1:
+        if not isinstance(el.receiver, int):
+            el.email = el.receiver
+        else:
+            el.email = el.receiver_ref.email
+        el.money = '-' + str(el.amount) + ' ' + el.currency
+    for el in list2:
+        if not isinstance(el.receiver, int):
+            el.email = el.receiver
+        else:
+            el.email = el.sender_ref.email
+        el.money = '+' + str(el.amount) + ' ' + el.currency
+
+    list = list1 + list2
+    sort = sorted(list, key=lambda x: x.time_created, reverse=True)
+
+    return pickle.dumps(sort)
+
 

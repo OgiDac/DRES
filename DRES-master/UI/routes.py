@@ -1,10 +1,13 @@
+from multiprocessing import Process
 from UI import app
 from flask import render_template, redirect, url_for, flash, get_flashed_messages, request
-from UI.models import Card, User, Transaction, TransactionCard
+from UI.models import Card, User, Transaction
 import pickle
 import requests
 from UI.forms import AddFundsForm, CurrencyForm, RegisterForm, LoginForm, UpdateProfileForm, VerificationForm, TransactionForm, TransactionCardForm
 from flask_login import login_user, login_required, logout_user, current_user
+import threading
+
 
 @app.route('/')
 @app.route('/index')
@@ -90,7 +93,6 @@ def updateProfile():
 def verificate():
     form=VerificationForm()
     if form.validate_on_submit():
-        
         card_to_create = Card(number = form.number.data, owner = current_user.id, expire_date = form.expire_date.data, code = form.code.data)
         dat = {'number':card_to_create.number, 'owner': card_to_create.owner, 'expire_date': card_to_create.expire_date, 'code':card_to_create.code}
 
@@ -98,6 +100,7 @@ def verificate():
         if response.content == b'false':
             return render_template('profileView.html')
         card = pickle.loads(response.content)
+        print(card)
 
         attempt_user_response = requests.get('http://localhost:5001/getuser', data = str(card.owner))
         if attempt_user_response.content == b'false':
@@ -107,7 +110,7 @@ def verificate():
         if card.code == int(form.code.data) and card.expire_date.__eq__(form.expire_date.data ) and attempt_user.name.__eq__(form.owner.data):
             current_user.verificated = True
             card.budget = card.budget-1
-            user_to_send = {'id' : current_user.id, 'name' :current_user.name, 'surname' :current_user.surname, 'address' :current_user.address, 'city' :current_user.city, 'country' :current_user.country, 'phone' :current_user.phone, 'email' :current_user.email, 'password' :current_user.password, 'verificated' :current_user.verificated, 'budget': current_user.budget, 'currency': current_user.currency, 'transactions': current_user.transactions}
+            user_to_send = {'id' : current_user.id, 'name' :current_user.name, 'surname' :current_user.surname, 'address' :current_user.address, 'city' :current_user.city, 'country' :current_user.country, 'phone' :current_user.phone, 'email' :current_user.email, 'password' :current_user.password, 'verificated' :current_user.verificated, 'budget': current_user.budget, 'currency': current_user.currency}
             card_to_send = {'id' : card.id, 'number': card.number, 'expire_date': card.expire_date, 'code': card.code, 'budget': card.budget}
            
             requests.get('http://localhost:5001/updateprofile', data=pickle.dumps(user_to_send))
@@ -125,16 +128,15 @@ def verificate():
 @app.route("/addFunds", methods=['GET', 'POST'])
 @login_required
 def add_funds():
-    print('TUuuuu SAM')
     form = AddFundsForm()
     if form.validate_on_submit():
-        if int(form.amount.data) > 0 and int(form.amount.data) < current_user.budget:
+        if int(form.amount.data) > 0 and int(form.amount.data) < current_user.card[0].budget:
             response =  requests.get('https://api.exchangerate-api.com/v4/latest/USD')
             data = response.json()
             rate = data['rates'][current_user.currency]
-            amount = rate * int(form.amount.data)
+            amount = rate * float(form.amount.data)
             current_user.budget = current_user.budget + amount
-            current_user.card[0].budget = current_user.card[0].budget - int(form.amount.data)        
+            current_user.card[0].budget = current_user.card[0].budget - float(form.amount.data)        
             current_user.budget = round(current_user.budget, 4)
             user_data = make_user_to_update(current_user)
             card_data = make_card_to_update(current_user.card[0])
@@ -157,23 +159,34 @@ def make_card_to_update(card):
     return card_to_send
 
 def make_user_to_update(user):
-    user_to_send = {'id' : current_user.id, 'name' :current_user.name, 'surname' :current_user.surname, 'address' :current_user.address, 'city' :current_user.city, 'country' :current_user.country, 'phone' :current_user.phone, 'email' :current_user.email, 'password' :current_user.password, 'verificated' :current_user.verificated, 'budget': current_user.budget, 'currency': current_user.currency, 'transactions': current_user.transactions}
+    user_to_send = {'id' : current_user.id, 'name' :current_user.name, 'surname' :current_user.surname, 'address' :current_user.address, 'city' :current_user.city, 'country' :current_user.country, 'phone' :current_user.phone, 'email' :current_user.email, 'password' :current_user.password, 'verificated' :current_user.verificated, 'budget': current_user.budget, 'currency': current_user.currency}
     return user_to_send
+
+@app.route("/makeTransaction", methods=['GET', 'POST'])
+@login_required
+def makeTransaction():
+    
+    return render_template('makeTransaction.html')
+
+
+def call_transaction(object):
+    print('Zapocinje se transakcija')
+    requests.post('http://localhost:5001/makeTransaction', data = pickle.dumps(object)) 
+    print('Zavrsena transakcija')
+
+# 1-U obradai 2-Obradjeno 3-Odbijeno
 
 @app.route("/transaction", methods=['GET', 'POST'])
 @login_required
 def transaction():
     form = TransactionForm()
     if form.validate_on_submit():
-        transaction_to_create = Transaction(email = form.email.data, amount = form.amount.data)
-        dat = {'email': transaction_to_create.email, 'amount': transaction_to_create.amount}
-        user_data = make_user_to_update(current_user)
-        objects = (dat, user_data)
-        response =  requests.get('http://localhost:5001/transaction', data=pickle.dumps(objects))
-        print(response)
-        if response.content == b'false':
-            return redirect(url_for('profileView'))
-        return redirect(url_for('profileView'))
+        tran = {'type':'online', 'state':1, 'sender':str(current_user.id), 'receiver':form.email.data, 'amount' : form.amount.data, 'currency' : current_user.currency}
+        
+
+        p = Process(target=call_transaction, args=[tran])
+        p.start()
+        return redirect(url_for('profileView'))                     
     if form.errors != {}:
         for err in form.errors.values():
             flash(err, category='danger')    
@@ -184,19 +197,23 @@ def transaction():
 def cardTransaction():
     form = TransactionCardForm()
     if form.validate_on_submit():
-        transaction_to_create = TransactionCard(number = form.number.data, amount = form.amount.data)
-        dat = {'number': transaction_to_create.number, 'amount': transaction_to_create.amount}
-        user_data = make_user_to_update(current_user)
-        objects = (dat, user_data)
-        response =  requests.get('http://localhost:5001/cardTransaction', data=pickle.dumps(objects))
-        print(response)
-        if response.content == b'false':
-            return redirect(url_for('profileView'))
-        return redirect(url_for('cardTransaction'))
+        tran = {'type':'card', 'state':1, 'sender':str(current_user.id), 'receiver':form.number.data, 'amount' : form.amount.data, 'currency' : current_user.currency}
+        requests.post('http://localhost:5001/makeTransaction', data = pickle.dumps(tran))   
+        return redirect(url_for('profileView'))                     
     if form.errors != {}:
         for err in form.errors.values():
             flash(err, category='danger')    
     return render_template('cardTransaction.html', form = form)
+
+
+
+@app.route('/transactionHistory', methods=['GET', 'POST'])
+@login_required
+def transactionHistory():
+    response = requests.get('http://localhost:5001/getAllTransactions', data=str(current_user.id))
+    list = pickle.loads(response.content)
+    print(list)
+    return render_template('transactionHistory.html', items = list)
 
 
 @app.route('/exchange', methods=['GET', 'POST'])

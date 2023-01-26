@@ -1,0 +1,46 @@
+{% extends 'baseLogedIn.html' %}
+
+{%block title %}
+    Make transaction
+{% endblock %}
+
+{% block content%}
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">To/From</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Date</th>
+        <th scope="col">Type of transaction</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        {% if item.state == 2 %}
+        <tr bgcolor="lightgreen">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.state == 3 %}
+        <tr bgcolor="#ff1a1a ">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+        
+          
+        {% endfor %}
+     
+    </tbody>
+  </table>
+
+
+{% endblock %}
+

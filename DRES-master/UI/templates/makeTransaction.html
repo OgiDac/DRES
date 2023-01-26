@@ -1,0 +1,14 @@
+{% extends 'baseLogedIn.html' %}
+
+{%block title %}
+    Make transaction
+{% endblock %}
+
+{% block content%}
+
+<h1>Da li zelite online transakciju ili transakciju na racun u banci</h1>
+
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('transaction')}}" style="float: left">On-line</a>
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('cardTransaction')}}" style="float: left">U banci</a>
+
+{% endblock %}

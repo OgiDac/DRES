@@ -74,10 +74,16 @@ class Card():
 #        self.to_who = to_who
 #        self.amount = amount
 class Transaction():
-    def __init__(self, email, amount):
-        self.email = email
+    def __init__(self, state, sender, receiver, amount):
+        self.state = state
+        self.sender = sender
+        self.receiver = receiver
         self.amount = amount
-class TransactionCard():
-    def __init__(self, number, amount):
-        self.number = number
-        self.amount = amount
+# class Transaction():
+#     def __init__(self, email, amount):
+#         self.email = email
+#         self.amount = amount
+# class TransactionCard():
+#     def __init__(self, number, amount):
+#         self.number = number
+#         self.amount = amount
