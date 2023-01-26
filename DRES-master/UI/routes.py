@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, flash, get_flashed_message
 from UI.models import Card, User, Transaction
 import pickle
 import requests
-from UI.forms import AddFundsForm, CurrencyForm, RegisterForm, LoginForm, UpdateProfileForm, VerificationForm, TransactionForm, TransactionCardForm
+from UI.forms import AddFundsForm, CurrencyForm, RegisterForm, LoginForm, UpdateProfileForm, VerificationForm, TransactionForm, TransactionCardForm, FilterTransactionForm
 from flask_login import login_user, login_required, logout_user, current_user
 import threading
 
@@ -212,9 +212,110 @@ def cardTransaction():
 def transactionHistory():
     response = requests.get('http://localhost:5001/getAllTransactions', data=str(current_user.id))
     list = pickle.loads(response.content)
-    print(list)
+    #print(list)
     return render_template('transactionHistory.html', items = list)
 
+@app.route('/filterBy', methods=['GET','POST'])
+@login_required
+def filterBy():
+    form = FilterTransactionForm()
+    if form.validate_on_submit():
+            response = requests.get('http://localhost:5001/getAllTransactions', data=str(current_user.id))
+            list = pickle.loads(response.content) 
+            person = form.person.data
+            print(person)
+            actions = form.actions.data
+            print(actions)
+            typeOfTransaction = form.typeOfTransaction.data
+            print(typeOfTransaction)
+            list1 = []
+
+            #AKO SE UNESE SAMO EMAIL
+            if person and typeOfTransaction=='none' and actions=='none':
+                for el in list:
+                    if person == el.email:
+                        list1.append(el) 
+
+                return render_template('transactionHistory.html', items = list1)
+            
+            #AKO SE UNESE SAMO TIP TRANSAKCIJE CARD/ONLINE
+            elif typeOfTransaction != 'none' and person=="" and actions=='none':
+                for el in list:
+                    if typeOfTransaction == el.type:
+                        
+                        list1.append(el)
+                print(list1)
+                return render_template('transactionHistory.html', items = list1)
+            
+             #AKO SE UNESE SAMO AKCIJA TJ DA LI CE ISPLATU ILI UPLATU
+            elif actions!="None" and actions=="payment" and person=="" and typeOfTransaction=='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])>0: #uplata/payment
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            elif actions!="None" and actions=="disbursement" and person=="" and typeOfTransaction=='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])<0: #isplata/ disbursement
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+
+            #AKO SE UNESE TIP TRANSAKCIJE I IMEJL
+            elif typeOfTransaction != 'none' and person and actions=='none':
+                for el in list:
+                    if typeOfTransaction==el.type and person==el.email:
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            
+            #AKO SE UNESE UPLATA/ISPLATA i TIP TRANSAKCIJE
+            elif actions!="None" and actions=="payment" and person=="" and typeOfTransaction!='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])>0 and el.type==typeOfTransaction: #uplata/payment
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            elif actions!="None" and actions=="disbursement" and person=="" and typeOfTransaction!='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])<0 and el.type==typeOfTransaction: #isplata/ disbursement
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            
+             #AKO SE UNESE UPLATA/ISPLATA i MEJL
+            elif actions!="None" and actions=="payment" and person and typeOfTransaction=='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])>0 and el.email==person: #uplata/payment
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            elif actions!="None" and actions=="disbursement" and person and typeOfTransaction=='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])<0 and el.email==person: #isplata/ disbursement
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            
+            #AKO SE UNESU SVA TRI 
+            elif actions!="none" and actions=="payment" and person and typeOfTransaction !='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])>0 and el.type==typeOfTransaction and el.email==person:
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            elif actions!="none" and actions=="disbursement"and person and typeOfTransaction !='none':
+                for el in list:
+                    payment=el.money.split(" ")
+                    if int(payment[0])<0 and el.type==typeOfTransaction and el.email==person:
+                        list1.append(el)
+                return render_template('transactionHistory.html', items=list1)
+            
+            
+            #AKO SE NE UNESE NISTA
+            else:
+                return render_template('transactionHistory.html', items=list)
+
+    return render_template('filterBy.html', form=form)
 
 @app.route('/exchange', methods=['GET', 'POST'])
 @login_required
@@ -234,3 +335,5 @@ def exchange():
         return render_template('profileView.html')
        
     return render_template('exchange.html', form=form)
+
+

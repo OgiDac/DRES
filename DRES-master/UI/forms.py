@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import Length, EqualTo, Email, DataRequired
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.validators import Length, EqualTo, Email, DataRequired, Optional
 
 
 class RegisterForm(FlaskForm):
@@ -56,4 +56,10 @@ class AddFundsForm(FlaskForm):
     submit = SubmitField(label='Submit')
 class CurrencyForm(FlaskForm):
    
+    submit = SubmitField(label='Submit')
+
+class FilterTransactionForm(FlaskForm):
+    person = StringField(label='Email', validators=[Email(), Optional()])
+    actions = SelectField(label='Payment/Disbursement', choices=[('payment','Payment'),('disbursement','Disbursement'),('none', 'None')])
+    typeOfTransaction = SelectField(label='Type of transaction', choices=[('online', 'Online'),('card', 'Card'),('none', 'None')])
     submit = SubmitField(label='Submit')
