@@ -22,6 +22,15 @@
     </thead>
     <tbody>
         {% for item in items %}
+        {% if item.state == 1 %}
+        <tr bgcolor="yellow">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+
         {% if item.state == 2 %}
         <tr bgcolor="lightgreen">
           <td>{{item.email}}</td>

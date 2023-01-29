@@ -1,4 +1,5 @@
 
+import threading
 from Engine import app
 import pickle
 from flask import redirect, render_template, request, flash, session, url_for, jsonify
@@ -7,8 +8,10 @@ import Engine
 from Engine.models import User, Card, Transaction
 import requests
 from sqlalchemy.orm import lazyload
-import multiprocessing
-import time
+from multiprocessing import Process, Queue
+from time import sleep
+
+queue = Queue()
 
 
 @app.route('/register', methods=['POST'])
@@ -193,70 +196,22 @@ def makeTransaction():
     data = request.data
     object = pickle.loads(data)
     sender = User.query.filter_by(id = object['sender']).first()
-     
+    
+    transaction = Transaction(sender = object['sender'], receiver = object['receiver'], amount = object['amount'], state = object['state'], currency = object['currency'], type = object['type'])
+    db.session.add(transaction)
+    db.session.commit()
 
-    if object['type'].__eq__('online'):
-        receiver = User.query.filter_by(email = object['receiver']).first()
-        tran = Transaction(sender = object['sender'], receiver = object['receiver'], amount = object['amount'], state = object['state'], currency = object['currency'], type = 'online')
-      
-        if receiver == None:
-            tran.state = 3
-            db.session.add(tran)
-            db.session.commit()
-            return 'false'
-        tran.receiver = str(receiver.id)
-        string = 'https://api.exchangerate-api.com/v4/latest/' + object['currency']
-        response =  requests.get(string)
-        data = response.json()
-        rate = data['rates'][receiver.currency]
-        amount = rate * float(object['amount'])
+    thread = threading.Thread(target=transactionThread, args=(transaction.id, ))
+    thread.start()
 
-        print(object['amount'] + object['currency'])
-        print(str(amount) + receiver.currency)
-        
-        if sender.budget - float(object['amount']) > 0:
+    return 'OK'
 
-            sender.budget = round(sender.budget - float(object['amount']), 4)
-            receiver.budget = round(receiver.budget + amount, 4)
-            tran.state = 2
-            db.session.add(tran)
-            db.session.commit()
-        else:
-            tran.state = 3
-            db.session.add(tran)
-            db.session.commit()
-            return 'false'
+def transactionThread(id):
+    print("NOVI TRED")
+    sleep(10)
+    queue.put(id)
 
-    else:
-        card = Card.query.filter_by(number = object['receiver']).first()
-        if card == None:
-            tran.state = 3
-            db.session.add(tran)
-            db.session.commit()
-            return 'false'
-        receiver = User.query.filter_by(id = card.owner).first()
-        tran = Transaction(sender = object['sender'], receiver = str(receiver.id), amount = object['amount'], state = object['state'], currency = object['currency'], type = 'card')
-        string = 'https://api.exchangerate-api.com/v4/latest/' + object['currency']
-        response =  requests.get(string)
-        data = response.json()
-        rate = data['rates'][receiver.currency]
-        amount = rate * float(object['amount'])
 
-        if sender.budget - float(object['amount']) > 0:
-            sender.budget = round(sender.budget - float(object['amount']), 4)
-            card.budget = round(card.budget + amount, 4)
-            tran.state = 2
-
-            db.session.add(tran)
-
-            db.session.commit()
-        else:
-            tran.state = 3
-            db.session.add(tran)
-            db.session.commit()
-            return 'false'
-    print('Zavrseno sa izvrsavanjem')
-    return 'true'
 
 @app.route('/getAllTransactions', methods=['GET'])
 def getAllTransactions(): 
@@ -305,6 +260,71 @@ def sort():
     sort = sorted(list, key=lambda x: x.time_created)
 
     return pickle.dumps(sort)
+
+
+def transactionProcess(queue: Queue):
+    app.app_context().push()
+    while 1:
+        try:
+            id = queue.get()
+        except KeyboardInterrupt:
+            break
+        
+        transaction = Transaction.query.filter_by(id = id).first()
+        sender = User.query.filter_by(id = transaction.sender).first()
+        print(transaction)
+        if str(transaction.type).__eq__('online'):
+            receiver = User.query.filter_by(email = transaction.receiver).first()
+            
+            if receiver == None:
+                transaction.state = 3
+                db.session.commit()
+                continue
+            string = 'https://api.exchangerate-api.com/v4/latest/' + str(transaction.currency)
+            response =  requests.get(string)
+            data = response.json()
+            rate = data['rates'][receiver.currency]
+            amount = rate * float(transaction.amount)
+
+            
+            if sender.budget - float(str(transaction.amount)) > 0:
+
+                sender.budget = round(sender.budget - float(transaction.amount), 4)
+                receiver.budget = round(receiver.budget + amount, 4)
+                transaction.state = 2
+                db.session.commit()
+            else:
+                transaction.state = 3
+                db.session.commit()
+
+        else:
+            card = Card.query.filter_by(number = transaction.receiver).first()
+            if card == None:
+                transaction.state = 3
+                db.session.commit()
+                continue
+            receiver = User.query.filter_by(id = card.owner).first()
+            string = 'https://api.exchangerate-api.com/v4/latest/' + str(transaction.currency)
+            response =  requests.get(string)
+            data = response.json()
+            rate = data['rates'][receiver.currency]
+            amount = rate * float(transaction.amount)
+            if sender.budget - float(str(transaction.amount)) > 0:
+                sender.budget = round(sender.budget - float(transaction.amount), 4)
+                card.budget = round(card.budget + amount, 4)
+                transaction.state = 2
+                print('DEBUG')
+                db.session.commit()
+                continue
+            else:
+                transaction.state = 3
+                db.session.commit()
+                continue
+        
+    
+
+
+
 
 """
 @app.route('/sortTransactions', methods=['POST'])

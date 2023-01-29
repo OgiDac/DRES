@@ -169,10 +169,7 @@ def makeTransaction():
     return render_template('makeTransaction.html')
 
 
-def call_transaction(object):
-    print('Zapocinje se transakcija')
-    requests.post('http://localhost:5001/makeTransaction', data = pickle.dumps(object)) 
-    print('Zavrsena transakcija')
+
 
 # 1-U obradai 2-Obradjeno 3-Odbijeno
 
@@ -184,8 +181,7 @@ def transaction():
         tran = {'type':'online', 'state':1, 'sender':str(current_user.id), 'receiver':form.email.data, 'amount' : form.amount.data, 'currency' : current_user.currency}
         
 
-        p = Process(target=call_transaction, args=[tran])
-        p.start()
+        requests.post('http://localhost:5001/makeTransaction', data = pickle.dumps(tran))
         return redirect(url_for('profileView'))                     
     if form.errors != {}:
         for err in form.errors.values():
