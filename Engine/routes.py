@@ -10,6 +10,8 @@ import requests
 from sqlalchemy.orm import lazyload
 from multiprocessing import Process, Queue
 from time import sleep
+from datetime import datetime
+
 
 queue = Queue()
 
@@ -256,12 +258,13 @@ def transactionProcess(queue: Queue):
     app.app_context().push()
     while 1:
         try:
+            print('DEBUG')
+
             id = queue.get()
         except KeyboardInterrupt:
             break
         
-        print('DEBUG')
-        
+
         transaction = Transaction.query.filter_by(id = id).first()
         sender = User.query.filter_by(id = transaction.sender).first()
         print(transaction)
@@ -277,15 +280,19 @@ def transactionProcess(queue: Queue):
             data = response.json()
             rate = data['rates'][receiver.currency]
             amount = rate * float(transaction.amount)
-
+            now = datetime.now()
+            delta = now- transaction.time_created
             print('DEBUG')
-            
-            if sender.budget - float(str(transaction.amount)) > 0:
-                print('DEBUG')
+
+            if sender.budget - float(str(transaction.amount)) > 0 and delta.seconds <120:
+                
 
                 sender.budget = round(sender.budget - float(transaction.amount), 4)
                 receiver.budget = round(receiver.budget + amount, 4)
+                
+                print(delta.seconds)
                 transaction.state = 2
+                transaction.receiver = receiver.id
                 db.session.commit()
                 continue
             else:
@@ -295,6 +302,8 @@ def transactionProcess(queue: Queue):
 
         else:
             card = Card.query.filter_by(number = transaction.receiver).first()
+            print(transaction.receiver)
+            print(card)
             if card == None:
                 transaction.state = 3
                 db.session.commit()
@@ -305,11 +314,14 @@ def transactionProcess(queue: Queue):
             data = response.json()
             rate = data['rates'][receiver.currency]
             amount = rate * float(transaction.amount)
-            if sender.budget - float(str(transaction.amount)) > 0:
+            now = datetime.now()
+            delta = now- transaction.time_created
+
+            if sender.budget - float(str(transaction.amount)) > 0 and delta.seconds < 120:
                 sender.budget = round(sender.budget - float(transaction.amount), 4)
                 card.budget = round(card.budget + amount, 4)
+                transaction.receiver = receiver.id
                 transaction.state = 2
-                print('DEBUG')
                 db.session.commit()
                 continue
             else:

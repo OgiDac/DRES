@@ -44,7 +44,7 @@ class TransactionForm(FlaskForm):
     submit = SubmitField(label='Send')
 
 class TransactionCardForm(FlaskForm):
-    number = StringField(label='Card Number', validators=[Length(20), DataRequired()])
+    number = StringField(label='Card Number', validators=[Length(19), DataRequired()])
     amount = StringField(label='Amount', validators=[Length(max=20), DataRequired()])
     submit = SubmitField(label='Send')
 
