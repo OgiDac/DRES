@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+
+{% block title %} 
+
+    Register 
+
+{% endblock %}
+
+{% block content %}
+<body class="text-center">
+    <div class="container">
+        <form method="POST" class="form-register">
+            {{ form.hidden_tag() }}
+            <h1 class="h3 mb-3 font-weight-normal">
+                Please create your account
+            </h1><br>
+            {{form.name.label()}}
+            {{form.name(class="form-control", placeholder="Name")}}
+
+            {{form.surname.label()}}
+            {{form.surname(class="form-control", placeholder="Surname")}}
+
+            {{form.address.label()}}
+            {{form.address(class="form-control", placeholder="Address")}}
+
+            {{form.city.label()}}
+            {{form.city(class="form-control", placeholder="City")}}
+
+            {{form.country.label()}}
+            {{form.country(class="form-control", placeholder="Country")}}
+
+            {{form.phone.label()}}
+            {{form.phone(class="form-control", placeholder="Phone")}}
+            
+            {{form.email.label()}}
+            {{form.email(class="form-control", placeholder="Email Adress")}}
+            
+            {{form.password1.label()}}
+            {{form.password1(class="form-control", placeholder="Password")}}
+            
+            {{form.password2.label()}}
+            {{form.password2(class="form-control", placeholder="Confirm Password")}}
+            <br>
+            {{ form.submit(class="btn btn-lg btn-block btn-primary") }}
+        </form>
+    </div>
+</body>
+
+{% endblock %}

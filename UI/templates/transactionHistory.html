@@ -1,0 +1,83 @@
+{% extends 'baseLogedIn.html' %}
+
+{%block title %}
+    Make transaction
+{% endblock %}
+
+{% block content%}
+
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('filterBy')}}" style="float: left">Filter by</a>
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('sort')}}" style="float: left">Sort by date ↑</a>
+<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('sortDesc')}}" style="float: left">Sort by date ↓</a>
+
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">To/From</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Date</th>
+        <th scope="col">Type of transaction</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        {% if item.state == 1 %}
+        <tr bgcolor="yellow">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.state == 2 %}
+        <tr bgcolor="lightgreen">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+
+        {% if item.state == 3 %}
+        <tr bgcolor="#ff1a1a ">
+          <td>{{item.email}}</td>
+          <td>{{ item.money }}</td>
+          <td>{{ item.time_created }}</td>
+          <td>{{ item.type }}</td>
+        </tr>
+        {% endif %}
+        
+          
+        {% endfor %}
+     
+    </tbody>
+  </table>
+
+  {% endblock %}
+  <script>
+   /* document.getElementById("sort-button").addEventListener("click", function() {
+    fetch('/sortTransactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            sortBy: 'time_created',
+            order: 'asc'
+        })
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        items = data;
+        updateTable();
+    });
+});*/
+
+
+</script>
+
+
+
+
