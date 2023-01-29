@@ -32,6 +32,11 @@ class UpdateProfileForm(FlaskForm):
     
     submit = SubmitField(label='Update')
 
+class PasswordForm(FlaskForm):
+    oldPassword = PasswordField(label='Old Password', validators=[Length(min=6), DataRequired()])
+    newPassword = PasswordField(label='New Password', validators=[Length(min=6), DataRequired()])
+    submit = SubmitField(label='Update')
+
 class VerificationForm(FlaskForm):
     number=StringField(label='Card Number', validators=[Length(20), DataRequired()])
     owner=StringField(label='Card Owner', validators=[Length(max=20), DataRequired()])

@@ -4,7 +4,7 @@ from flask import render_template, redirect, url_for, flash, get_flashed_message
 from UI.models import Card, User, Transaction
 import pickle
 import requests
-from UI.forms import AddFundsForm, CurrencyForm, RegisterForm, LoginForm, UpdateProfileForm, VerificationForm, TransactionForm, TransactionCardForm, FilterTransactionForm
+from UI.forms import AddFundsForm, CurrencyForm, RegisterForm, LoginForm, UpdateProfileForm, VerificationForm, TransactionForm, TransactionCardForm, FilterTransactionForm, PasswordForm
 from flask_login import login_user, login_required, logout_user, current_user
 import threading
 
@@ -351,3 +351,19 @@ def sortDesc():
     list = pickle.loads(response.content)
 
     return render_template('transactionHistory.html', items = list)
+
+@app.route('/updatePassword', methods=['GET', 'POST'])
+@login_required
+def updatePassword():
+    form = PasswordForm()
+    if form.validate_on_submit():
+        if form.oldPassword.data.__eq__(current_user.password):
+            current_user.password = form.newPassword.data
+            object = make_user_to_update(current_user)
+            requests.post('http://localhost:5001/updateprofile', data=pickle.dumps(object))
+            return redirect(url_for('profileView'))
+            
+    if form.errors != {}:
+        for err in form.errors.values():
+            flash(err, category='danger')
+    return render_template('password.html', form = form)

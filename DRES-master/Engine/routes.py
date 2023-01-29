@@ -82,6 +82,7 @@ def updateprofile():
     changed_user.verificated = s['verificated']
     changed_user.budget = s['budget']
     changed_user.currency = s['currency']
+    changed_user.password = s['password']
 
     db.session.commit()
     return 'Hello from app2!'
@@ -305,6 +306,8 @@ def sort():
     sort = sorted(list, key=lambda x: x.time_created)
 
     return pickle.dumps(sort)
+
+
 
 """
 @app.route('/sortTransactions', methods=['POST'])
