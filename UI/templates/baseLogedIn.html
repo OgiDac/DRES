@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>
+    .bg-c-lite-green {
+      background: -webkit-gradient(linear, left top, right top, from(#9884ff), to(#1c1763));
+  background: linear-gradient(to right, #9884ff, #1c1763);
+}
+  </style>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,7 +78,7 @@
               <button type="button" class="m1-2 mb-1 close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true" >&times;</span>
               </button>
-              {{ mess[0] }}
+              {{ mess }}
             </div>
           {% endfor %}
         {% endif %}

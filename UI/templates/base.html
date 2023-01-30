@@ -8,6 +8,7 @@
      
 
     </title>
+  
 </head>
 <body>
    
@@ -17,6 +18,12 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <style>
+      .bg-c-lite-green {
+        background: -webkit-gradient(linear, left top, right top, from(#9884ff), to(#1c1763));
+    background: linear-gradient(to right, #9884ff, #1c1763);
+}
+    </style>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -29,8 +36,8 @@
     {% endblock %}</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Navbar</a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light bg-c-lite-green">
+        <a class="navbar-brand" href="#">OnlineBank</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -58,7 +65,7 @@
               <button type="button" class="m1-2 mb-1 close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true" >&times;</span>
               </button>
-              {{ mess[0] }}
+              {{ mess }}
             </div>
           {% endfor %}
         {% endif %}

@@ -1,18 +1,44 @@
-{% extends 'baseLogedIn.html' %}
+{% include 'profileView.html' %}
 
-{%block title %}
-    Make transaction
-{% endblock %}
 
-{% block content%}
+<div class="modal" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Make transaction</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        
+            <div class="container">
+                {% if current_user.verificated %}
 
-{% if current_user.verificated %}
+                    <p>Do you want to make transaction through online or bank account?</p>
 
-<h1>Da li zelite online transakciju ili transakciju na racun u banci</h1>
+                    <a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('transaction')}}" style="float: center">Online</a>
+                    <a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('cardTransaction')}}" style="float: center">Bank</a>
+                {% else %}
+                    <p>You are not verificated, you can't make a transaction!</p>
+                {% endif %} 
+            </div>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('transaction')}}" style="float: left">On-line</a>
-<a class="btn btn-outline-success my-2 my-sm-0 " href="{{url_for('cardTransaction')}}" style="float: left">U banci</a>
-{% else %}
-    <h1>NISI VERIFIKOVAN</h1>
-{% endif %}  
-{% endblock %}
+
+<script>
+    $(document).ready(function() {
+        console.log("window is loaded")
+        $("#exampleModal").modal("show")
+    })
+</script>
+
+
+
+

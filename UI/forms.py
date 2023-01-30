@@ -8,7 +8,7 @@ class RegisterForm(FlaskForm):
     surname = StringField(label='Surname', validators=[Length(min=3, max=20), DataRequired()])
     address = StringField(label='Address', validators=[Length(min=3, max=20), DataRequired()])
     city = StringField(label='City', validators=[Length(min=3, max=20), DataRequired()])
-    country = StringField(label='County', validators=[Length(min=3, max=20), DataRequired()])
+    country = StringField(label='Country', validators=[Length(min=3, max=20), DataRequired()])
     phone = StringField(label='Phone', validators=[Length(min=3, max=20), DataRequired()])
     email = StringField(label='Email Address', validators=[Email(), DataRequired()])
     password1 = PasswordField(label='Password', validators=[Length(min=6), DataRequired()])
